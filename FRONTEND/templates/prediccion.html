@@ -1,0 +1,142 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.0.2/dist/css/bootstrap.min.css" rel="stylesheet"
+    integrity="sha384-EVSTQN3/azprG1Anm3QDgpJLIm9Nao0Yz1ztcQTwFspd3yD65VohhpuuCOmLASjC" crossorigin="anonymous">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link rel="stylesheet" href="/static/css/styles.css">
+    <title>SDN - Predicción</title>
+
+    <style>
+        :root {
+            --shadow-color: 183deg 29% 55%;
+            --shadow-elevation-low:
+                -0.2px 0.8px 0.9px hsl(var(--shadow-color) / 0.19),
+                -0.3px 1.2px 1.4px -1.2px hsl(var(--shadow-color) / 0.2),
+                -0.6px 2.6px 3px -2.4px hsl(var(--shadow-color) / 0.2);
+            --shadow-elevation-medium:
+                -0.2px 0.8px 0.9px hsl(var(--shadow-color) / 0.2),
+                -0.5px 2.4px 2.8px -0.8px hsl(var(--shadow-color) / 0.21),
+                -1.3px 5.6px 6.6px -1.6px hsl(var(--shadow-color) / 0.21),
+                -3px 13.2px 15.4px -2.4px hsl(var(--shadow-color) / 0.22);
+            --shadow-elevation-high:
+                -0.2px 0.8px 0.9px hsl(var(--shadow-color) / 0.19),
+                -0.7px 3.3px 3.8px -0.3px hsl(var(--shadow-color) / 0.19),
+                -1.3px 5.8px 6.8px -0.7px hsl(var(--shadow-color) / 0.19),
+                -2.1px 9.3px 10.9px -1px hsl(var(--shadow-color) / 0.2),
+                -3.3px 14.6px 17.1px -1.4px hsl(var(--shadow-color) / 0.2),
+                -5.1px 22.5px 26.3px -1.7px hsl(var(--shadow-color) / 0.2),
+                -7.6px 33.8px 39.5px -2.1px hsl(var(--shadow-color) / 0.2),
+                -11.2px 49.5px 57.9px -2.4px hsl(var(--shadow-color) / 0.2);
+            }
+        body {
+            background-color: #E9FFF9;
+            height:100vh;
+            padding: 0;
+            margin: 0;
+            box-sizing: border-box;
+        }
+
+        .neumoniaText {
+            color: #467599;
+            font-weight: bold;
+        }
+
+        .contenedor1 {
+            height: 30%; 
+            background-color: #9ED8DB; 
+            position: relative;
+        }
+
+        .subContenedor1 {
+            background-color: #fdfdfd;
+            border-radius: 2rem;
+            padding: 1rem;
+            box-shadow: var(--shadow-elevation-high);
+            position: absolute; 
+            top: 100px; 
+            left: 0; 
+            right: 0; 
+            margin: 0 auto;
+        }
+
+        .contenedor2 {
+            margin: 150px 0px;
+        }
+
+        table {
+            background-color: #fdfdfd;
+        }
+
+        @media screen and (max-width: 300px) {
+            .contenedor2 {
+                margin-top: 200px;
+            }
+        }
+    </style>
+</head>
+
+<body>
+
+    <nav class="navbar navbar-light bg-light">
+        <div class="container-fluid">
+            <a class="navbar-brand" href="{{ url_for('index') }}">
+                Home <i class="fa-solid fa-house"></i>
+            </a>
+        </div>
+    </nav>
+
+    <div class="contenedor1">
+        <div class="subContenedor1 col-9 d-flex flex-column justify-content-center align-items-center">
+            <h1 class="text-cyan-500 text-center">Predicción de <span class="neumoniaText">neumonía <i class="fa-solid fa-x-ray"></i></span> </h1>
+            <div class="col-10 mt-3 p-3">
+                <form method="POST" action="/predict" enctype="multipart/form-data">
+                    <label class="form-label" for="image">Selecciona una imagen:</label>
+                    <input class="form-control" type="file" name="file" id="image" required>
+                    <button class="btn btnPrediccion container-fluid mt-3" type="submit">Predecir</button>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <div class="contenedor2">
+        <div class="row d-flex justify-content-center align-items-center gap-2">
+            {% if prediction %}
+            <div class="col-9 col-md-4 col-lg-3 mt-5">
+                <img width="100%" height="auto" src="{{ url_for('static', filename=prediction[2]) }}" alt="Imagen de entrada">
+                <div class="alert alert-{{prediction[4]}} d-flex justify-content-between align-items-center" role="alert">
+                    <span>Resultado: {{ prediction[3] }}</span> 
+                    {% if prediction[4] == 'success' %}
+                        <span class="iconPrediction"><i class="fa-sharp fa-solid fa-virus"></i></span>
+                    {% endif %}
+                    
+                    {% if prediction[4] == 'danger' %}
+                        <span class="iconPrediction"><i class="fa-solid fa-face-smile"></i></span>
+                    {% endif %}
+                </div>
+            </div>
+
+            <div class="col-9 col-md-4 col-lg-3 mt-5">
+                <table class="table mt-0 text-center">
+                    <tr>
+                        <th>Normal</th>
+                        <th>Neumonia</th>
+                    </tr>
+                    <tr>
+                        <th> {{ "{:.4f}%".format(prediction[0])  }}</th>
+                        <th> {{ "{:.4f}%".format(prediction[1])  }}</th>
+                    </tr>
+                </table>
+            </div>
+            {% endif %}
+        </div>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.0.2/dist/js/bootstrap.bundle.min.js" integrity="sha384-MrcW6ZMFYlzcLA8Nl+NtUVF0sA7MsXsP1UyJoMp4YLEuNSfAP+JcXn/tWtIaxVXM" crossorigin="anonymous"></script>
+</body>
+
+</html>
